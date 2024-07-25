@@ -1,8 +1,10 @@
 
-前端可以放在sky-server/src/main/resources/static里，但是后端现在还是野生的，还不能运行。之后如果要前后端分离前端代码就放Nginx的html文件夹里，Nginx再移到外面去
+前端可以放在sky-server/src/main/resources/static里，但是后端现在还是野生的，还不能运行。之后如果要前后端分离，前端代码就放Nginx的html文件夹里，然后Nginx再移到外面去
 
-数据库搞好了，MySQL运行那个文件就行了。接口文档正在写，已经有思路了
+功能分析那个草稿是我自己捋的一个思路。数据库建搞好了，MySQL运行.sql文件就行了。接口文档正在写，已经有思路了，今天搞出来
 
+
+----
 # AI-intelligent-sparring
 AI 智能陪练系统
 ## 整体背景
