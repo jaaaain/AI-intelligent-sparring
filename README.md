@@ -1,3 +1,4 @@
+
 前端可以放在emp-train/sky-server/src/main/resources/static里，但是后端现在还是野生的，还不能运行。之后如果要前后端分离前端代码就放Nginx的html文件夹里
 
 数据库搞好了，MySQL运行那个文件就行了。接口文档正在写，已经有思路了

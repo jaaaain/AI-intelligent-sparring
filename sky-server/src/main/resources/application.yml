@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: emp-train
+
+  # 数据库链接设置
+  datasource:
+    url: jdbc:mysql://localhost:3306/emp-train
+    username: root
+    password: 1234
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.jaaaain.entity
+
+aliyun:
+  oss:
+    endpoint: https://oss-cn-hangzhou.aliyuncs.com
+    bucket-name: jaaain-test02
+    access-key-id: ${OSS_ACCESS_KEY_ID}
+    access-key-secret: ${OSS_ACCESS_KEY_SECRET}
+
+sky:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    secret-key: liuyaowen
+    # 设置jwt过期时间
+    ttl: 3600000 # 一个小时
+    # 设置前端传递过来的令牌名称
+    token-name: token
+
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug

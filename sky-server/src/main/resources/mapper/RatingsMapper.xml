@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jaaaain.mapper.RatingsMapper">
+
+    <!--查询单个-->
+    <select id="queryById" resultType="com.jaaaain.entity.Ratings">
+        select *
+        from ratings
+        where rating_id = #{ratingId}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryByLimit" resultType="com.jaaaain.entity.Ratings">
+        select *
+        from ratings
+        <where>
+            <if test="ratingId != null">
+                and rating_id = #{ratingId}
+            </if>
+            <if test="conversationId != null">
+                and conversation_id = #{conversationId}
+            </if>
+            <if test="dimensionId != null">
+                and dimension_id = #{dimensionId}
+            </if>
+            <if test="score != null">
+                and score = #{score}
+            </if>
+            <if test="content != null and content != ''">
+                and content = #{content}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+        </where>
+        limit #{pageable.offset}, #{pageable.pageSize}
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert" keyProperty="ratingId" useGeneratedKeys="true">
+        insert into ratings(conversation_iddimension_idscorecontentcreate_time)
+        values (#{conversationId}#{dimensionId}#{score}#{content}#{createTime})
+    </insert>
+
+    <insert id="insertBatch" keyProperty="ratingId" useGeneratedKeys="true">
+        insert into ratings(conversation_iddimension_idscorecontentcreate_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+        (#{entity.conversationId}#{entity.dimensionId}#{entity.score}#{entity.content}#{entity.createTime})
+        </foreach>
+    </insert>
+
+    <insert id="UpdateBatch" keyProperty="ratingId" useGeneratedKeys="true">
+        insert into ratings(conversation_iddimension_idscorecontentcreate_time)
+        values
+        <foreach collection="entities" item="entity" separator=",">
+            (#{entity.conversationId}#{entity.dimensionId}#{entity.score}#{entity.content}#{entity.createTime})
+        </foreach>
+        on duplicate key update
+conversation_id = values(conversation_id)dimension_id = values(dimension_id)score = values(score)content = values(content)create_time = values(create_time)
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="update">
+        update ratings
+        <set>
+            <if test="conversationId != null">
+                conversation_id = #{conversationId},
+            </if>
+            <if test="dimensionId != null">
+                dimension_id = #{dimensionId},
+            </if>
+            <if test="score != null">
+                score = #{score},
+            </if>
+            <if test="content != null and content != ''">
+                content = #{content},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+        </set>
+        where rating_id = #{ratingId}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById">
+        delete from ratings where rating_id = #{ratingId}
+    </delete>
+
+</mapper>
+
