@@ -26,19 +26,19 @@ public class RatingDimensionsServiceImpl implements RatingDimensionsService {
      * @return 实例对象
      */
     @Override
-    public RatingDimensions queryById(Integer dimensionId) {
+    public RatingDimensions queryById(int dimensionId) {
         return ratingDimensionsMapper.queryById(dimensionId);
     }
 
     /**
-     * 分页查询
-     * @param ratingDimensions 筛选条件
+     * 普通分页查询
+     * @param
      * @return 查询结果
      */
     @Override
-    public PageBean queryByLimit(Integer page, Integer size, RatingDimensions ratingDimensions) {
+    public PageBean queryALLByPage(int page, int size) {
         PageHelper.startPage(page, size); // 将下一条搜索改为查count和limit两条
-        List<RatingDimensions> list = ratingDimensionsMapper.queryAllByLimit(ratingDimensions);  // 得到的数据直接为PageBean类型
+        List<RatingDimensions> list = ratingDimensionsMapper.queryALL();  // 得到的数据直接为PageBean类型
         Page<RatingDimensions> p = (Page<RatingDimensions>) list;  // 强制类型转换
         PageBean pageBean = new PageBean(p.getTotal(),p.getResult());
         return pageBean;
@@ -67,12 +67,13 @@ public class RatingDimensionsServiceImpl implements RatingDimensionsService {
     }
 
     /**
-     * 通过主键删除数据
-     * @param dimensionId 主键
-     * @return 是否成功
+     * 获取启用的评分维度信息
+     * @param
+     * @return 查询结果
      */
     @Override
-    public boolean deleteById(Integer dimensionId) {
-        return ratingDimensionsMapper.deleteById(dimensionId) > 0;
+    public List<RatingDimensions> queryEnabled() {
+        return ratingDimensionsMapper.queryEnabled();
     }
+
 }

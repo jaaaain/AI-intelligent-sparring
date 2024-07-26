@@ -32,12 +32,12 @@
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="dimensionId" useGeneratedKeys="true">
-        insert into rating_dimensions(dimension_namedescriptionstatus)
-        values (#{dimensionName}#{description}#{status})
+        insert into rating_dimensions(dimension_name,description)
+        values (#{dimensionName},#{description})
     </insert>
 
     <insert id="insertBatch" keyProperty="dimensionId" useGeneratedKeys="true">
-        insert into rating_dimensions(dimension_namedescriptionstatus)
+        insert into rating_dimensions(dimension_name,description)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.dimensionName}#{entity.description}#{entity.status})
@@ -58,9 +58,6 @@ dimension_name = values(dimension_name)description = values(description)status =
     <update id="update">
         update rating_dimensions
         <set>
-            <if test="dimensionName != null and dimensionName != ''">
-                dimension_name = #{dimensionName},
-            </if>
             <if test="description != null and description != ''">
                 description = #{description},
             </if>

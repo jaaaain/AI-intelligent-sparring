@@ -26,19 +26,19 @@ public class ScenariosServiceImpl implements ScenariosService {
      * @return 实例对象
      */
     @Override
-    public Scenarios queryById(Integer scenarioId) {
+    public Scenarios queryById(int scenarioId) {
         return scenariosMapper.queryById(scenarioId);
     }
 
     /**
-     * 分页查询
-     * @param scenarios 筛选条件
+     * 普通分页查询
+     * @param
      * @return 查询结果
      */
     @Override
-    public PageBean queryByLimit(Integer page, Integer size, Scenarios scenarios) {
+    public PageBean queryALLByPage(int page, int size) {
         PageHelper.startPage(page, size); // 将下一条搜索改为查count和limit两条
-        List<Scenarios> list = scenariosMapper.queryAllByLimit(scenarios);  // 得到的数据直接为PageBean类型
+        List<Scenarios> list = scenariosMapper.queryAll();  // 得到的数据直接为PageBean类型
         Page<Scenarios> p = (Page<Scenarios>) list;  // 强制类型转换
         PageBean pageBean = new PageBean(p.getTotal(),p.getResult());
         return pageBean;
@@ -67,12 +67,12 @@ public class ScenariosServiceImpl implements ScenariosService {
     }
 
     /**
-     * 通过主键删除数据
-     * @param scenarioId 主键
-     * @return 是否成功
+     * 获取启用的评分维度信息
+     * @param
+     * @return 查询结果
      */
     @Override
-    public boolean deleteById(Integer scenarioId) {
-        return scenariosMapper.deleteById(scenarioId) > 0;
+    public List<Scenarios> queryEnabled() {
+        return scenariosMapper.queryEnabled();
     }
 }

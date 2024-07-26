@@ -1,7 +1,10 @@
 package com.jaaaain.service;
 
+import com.jaaaain.entity.RatingDimensions;
 import com.jaaaain.entity.Scenarios;
 import com.jaaaain.result.PageBean;
+
+import java.util.List;
 
 /**
  * 存储不同场景的详细信息(Scenarios)表服务接口
@@ -13,14 +16,14 @@ public interface ScenariosService {
      * @param scenarioId 主键
      * @return 实例对象
      */
-    Scenarios queryById(Integer scenarioId);
+    Scenarios queryById(int scenarioId);
 
     /**
-     * 分页查询
-     * @param scenarios 筛选条件
-     * @return 查询结果
+     * 普通分页查询
+     * @param page,size
+     * @return
      */
-    PageBean queryByLimit(Integer page, Integer size, Scenarios scenarios);
+    PageBean queryALLByPage(int page, int size);
 
     /**
      * 新增数据
@@ -37,9 +40,8 @@ public interface ScenariosService {
     Scenarios update(Scenarios scenarios);
 
     /**
-     * 通过主键删除数据
-     * @param scenarioId 主键
-     * @return 是否成功
+     * 查询启用的评分维度
+     * @return
      */
-    boolean deleteById(Integer scenarioId);
+    List<Scenarios> queryEnabled();
 }

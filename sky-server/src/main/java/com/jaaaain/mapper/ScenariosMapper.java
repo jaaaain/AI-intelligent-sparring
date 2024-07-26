@@ -2,6 +2,7 @@ package com.jaaaain.mapper;
 
 import com.jaaaain.entity.Scenarios;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -19,19 +20,19 @@ public interface ScenariosMapper {
     Scenarios queryById(Integer scenarioId);
 
     /**
-     * 查询指定行数据
-     * @param scenarios 查询条件
-     * @return 对象列表
+     * 查询所有数据
+     * @return
      */
-    List<Scenarios> queryByLimit(Scenarios scenarios);
+    @Select("select * from scenarios")
+    List<Scenarios> queryAll();
 
     /**
-     * 通过主键删除数据
-     * @param scenarioId 主键
-     * @return 影响行数
+     * 查询启用的场景信息
+     * @return
      */
-    int deleteById(Integer scenarioId);
-    
+    @Select("select * from scenarios where status = 1")
+    List<Scenarios> queryEnabled();
+
     /**
      * 新增数据
      * @param scenarios 实例对象
@@ -40,26 +41,11 @@ public interface ScenariosMapper {
     int insert(Scenarios scenarios);
 
     /**
-     * 批量新增数据（foreach）
-     * @param entities List<Scenarios> 实例对象列表
-     * @return 影响行数
-     */
-    int insertBatch(List<Scenarios> entities);
-
-    /**
      * 修改数据
      * @param scenarios 实例对象
      * @return 影响行数
      */
     int update(Scenarios scenarios);
 
-    /**
-     * 批量更新数据（foreach）
-     * @param entities List<Scenarios> 实例对象列表
-     * @return 影响行数
-     * @throws org.springframework.jdbc.BadSqlGrammarException 入参是空List的时候会抛SQL语句错误的异常
-     */
-    int UpdateBatch(List<Scenarios> entities);
-    
 }
 

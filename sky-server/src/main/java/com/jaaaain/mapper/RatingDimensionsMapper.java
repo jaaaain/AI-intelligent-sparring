@@ -2,6 +2,7 @@ package com.jaaaain.mapper;
 
 import com.jaaaain.entity.RatingDimensions;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -19,19 +20,19 @@ public interface RatingDimensionsMapper {
     RatingDimensions queryById(Integer dimensionId);
 
     /**
-     * 查询指定行数据
-     * @param ratingDimensions 查询条件
-     * @return 对象列表
+     * 查询所有数据
+     * @return
      */
-    List<RatingDimensions> queryByLimit(RatingDimensions ratingDimensions);
+    @Select("select * from rating_dimensions")
+    List<RatingDimensions> queryALL();
 
     /**
-     * 通过主键删除数据
-     * @param dimensionId 主键
-     * @return 影响行数
+     * 查询启用的评分维度信息
+     * @return
      */
-    int deleteById(Integer dimensionId);
-    
+    @Select("select * from rating_dimensions where status = 1")
+    List<RatingDimensions> queryEnabled();
+
     /**
      * 新增数据
      * @param ratingDimensions 实例对象
@@ -40,26 +41,11 @@ public interface RatingDimensionsMapper {
     int insert(RatingDimensions ratingDimensions);
 
     /**
-     * 批量新增数据（foreach）
-     * @param entities List<RatingDimensions> 实例对象列表
-     * @return 影响行数
-     */
-    int insertBatch(List<RatingDimensions> entities);
-
-    /**
      * 修改数据
      * @param ratingDimensions 实例对象
      * @return 影响行数
      */
     int update(RatingDimensions ratingDimensions);
 
-    /**
-     * 批量更新数据（foreach）
-     * @param entities List<RatingDimensions> 实例对象列表
-     * @return 影响行数
-     * @throws org.springframework.jdbc.BadSqlGrammarException 入参是空List的时候会抛SQL语句错误的异常
-     */
-    int UpdateBatch(List<RatingDimensions> entities);
-    
 }
 

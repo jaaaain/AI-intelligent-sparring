@@ -3,6 +3,8 @@ package com.jaaaain.service;
 import com.jaaaain.entity.RatingDimensions;
 import com.jaaaain.result.PageBean;
 
+import java.util.List;
+
 /**
  * 存储评分维度信息(RatingDimensions)表服务接口
  * @since 2024-07-23 16:34:25
@@ -13,14 +15,15 @@ public interface RatingDimensionsService {
      * @param dimensionId 主键
      * @return 实例对象
      */
-    RatingDimensions queryById(Integer dimensionId);
+    RatingDimensions queryById(int dimensionId);
 
     /**
-     * 分页查询
-     * @param ratingDimensions 筛选条件
-     * @return 查询结果
+     * 普通分页查询
+     * @param page
+     * @param size
+     * @return
      */
-    PageBean queryByLimit(Integer page, Integer size, RatingDimensions ratingDimensions);
+    PageBean queryALLByPage(int page, int size);
 
     /**
      * 新增数据
@@ -37,9 +40,8 @@ public interface RatingDimensionsService {
     RatingDimensions update(RatingDimensions ratingDimensions);
 
     /**
-     * 通过主键删除数据
-     * @param dimensionId 主键
-     * @return 是否成功
+     * 查询启用的评分维度
+     * @return
      */
-    boolean deleteById(Integer dimensionId);
+    List<RatingDimensions> queryEnabled();
 }
