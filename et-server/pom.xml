@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.jaaaain</groupId>
-        <artifactId>sky-self-write</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <artifactId>et</artifactId>
+        <version>1.0-SNAPSHOT</version>
     </parent>
     <artifactId>et-server</artifactId>
     <dependencies>
@@ -13,20 +13,14 @@
         <dependency>
             <groupId>com.jaaaain</groupId>
             <artifactId>et-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.jaaaain</groupId>
             <artifactId>et-pojo</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-websocket</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -34,16 +28,16 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
+
 
 </project>
