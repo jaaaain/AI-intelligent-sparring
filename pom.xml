@@ -13,9 +13,9 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>sky-common</module>
-        <module>sky-pojo</module>
-        <module>sky-server</module>
+        <module>et-common</module>
+        <module>et-pojo</module>
+        <module>et-server</module>
     </modules>
 
 
