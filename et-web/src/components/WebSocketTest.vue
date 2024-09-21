@@ -19,7 +19,6 @@
 </template>
 
 <script>
-import { parse } from 'ipaddr.js';
 export default {
   data() {
     return {
