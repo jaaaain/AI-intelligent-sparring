@@ -2,14 +2,17 @@ package com.jaaaain.websocket;
 
 import com.alibaba.fastjson.JSONObject;
 import com.jaaaain.constant.ChatConstant;
+import com.jaaaain.mapper.ConversationsMapper;
 import com.jaaaain.properties.ChatProperties;
 import com.jaaaain.service.AiService;
+import com.jaaaain.service.ChatSessionService;
 import com.jaaaain.vo.RetMsgVO;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.service.OpenAiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import jakarta.websocket.OnClose;
@@ -30,17 +33,18 @@ import java.util.Map;
 @Component
 @ServerEndpoint("/api/websocket/conversation/{sid}") // 通过这个地址建立的连接都会通过这个服务端来处理，每一个链接都会创造一个服务端对象
 public class WebSocketServer {
-    //存放会话对象
-    private static Map<String, Session> sessionMap = new HashMap(); // 存储 sid 和 session
-    private static Map<String,OpenAiService> aiServiceMap = new HashMap();
-    private AiService aiService;
-    private ChatProperties chatProperties;
+
+    public static final String SESSIONKEY = "session";
+    public static final String SERVICEKEY = "aiService";
+    public static final String CONVHISKEY = "conversationHistory";
 
     @Autowired
-    public WebSocketServer(AiService aiService, ChatProperties chatProperties) {
-        this.aiService = aiService;
-        this.chatProperties = chatProperties;
-    }
+    private ChatSessionService chatSessionService; // 对话记录数据库存储
+    @Autowired
+    private RedisTemplate redisTemplate; // 使用 Redis 哈希存储每个 sid 对应的 session、aiService、conversationHistory
+
+    private AiService aiService;
+    private ChatProperties chatProperties;
 
     //定义系列固定名称和参数的方法 onOpen、onMessage、onClose、发送方法
     /**
@@ -49,17 +53,22 @@ public class WebSocketServer {
     @OnOpen
     public void onOpen(Session session, @PathParam("sid") String sid) {
         Integer option = Integer.valueOf(session.getQueryString().split("option=")[1]);
+        Integer uid = Integer.valueOf(session.getQueryString().split("uid=")[1]);
         System.out.println("客户端：" + sid + "建立连接。option:" + option);
-        sessionMap.put(sid, session);
+        chatSessionService.newChatSession(Integer.valueOf(sid),uid,option);
         // 创建一个ai对话服务
         OpenAiService service = new OpenAiService(chatProperties.getOpenaiKey());
-        aiServiceMap.put(sid,service);
+
 
         // 初始化对话历史记录
         List<ChatMessage> conversationHistory = new ArrayList<>();
         conversationHistory.add(new ChatMessage("system", ChatConstant.SYSTEM_INITIAL));
         conversationHistory.add(new ChatMessage("user", ChatConstant.EMPLOYEE_GREETING));
         conversationHistory.add(new ChatMessage("assistant", ChatConstant.TOO_SLOW));
+
+        redisTemplate.opsForHash().put(sid,SESSIONKEY,session);
+        redisTemplate.opsForHash().put(sid,SERVICEKEY,service);
+        redisTemplate.opsForHash().put(sid,CONVHISKEY,conversationHistory);
 
         // 发送抱怨开场白
         RetMsgVO aiGreetingMsgVO = new RetMsgVO("AI", "顾客抱怨: " + ChatConstant.TOO_SLOW);
@@ -73,11 +82,11 @@ public class WebSocketServer {
     @OnMessage
     public void onMessage(String message, @PathParam("sid") String sid) {
         System.out.println("收到来自客户端：" + sid + "的信息:" + message);
-        OpenAiService service = aiServiceMap.get(sid);
+        OpenAiService service = (OpenAiService) redisTemplate.opsForHash().get(sid,SESSIONKEY);
+        List<ChatMessage> conversationHistory = (List<ChatMessage>) redisTemplate.opsForHash().get(sid,CONVHISKEY);
 
         // 新增对应session的对话历史记录
         ChatMessage userMessage = new ChatMessage("user", message);
-        List<ChatMessage> conversationHistory = getConversationHistory(sid); // 通过sid获取对应session的对话历史记录
         conversationHistory.add(userMessage);
 
         // AI通过对话历史记录生成回复
@@ -91,6 +100,7 @@ public class WebSocketServer {
         ChatMessage aiResponse = result.getChoices().get(0).getMessage();
 
         conversationHistory.add(aiResponse);
+        redisTemplate.opsForHash().put(sid,CONVHISKEY,conversationHistory);
 
         // Send AI response to client
         RetMsgVO aiReternMsg = new RetMsgVO("AI", aiResponse.getContent());
@@ -104,9 +114,9 @@ public class WebSocketServer {
     @OnClose
     public void onClose(@PathParam("sid") String sid) {
         System.out.println("连接断开:" + sid);
-        OpenAiService service = aiServiceMap.get(sid);
+        OpenAiService service = (OpenAiService) redisTemplate.opsForHash().get(sid,SERVICEKEY);
         System.out.println("对话结束，正在生成评分和反馈...");
-        List<ChatMessage> conversationHistory = getConversationHistory(sid); // 通过sid获取对应session的对话历史记录
+        List<ChatMessage> conversationHistory = (List<ChatMessage>) redisTemplate.opsForHash().get(sid,CONVHISKEY);
         conversationHistory.add(new ChatMessage("system",ChatConstant.SYSTEM_FEEDBACK));
         ChatCompletionRequest feedbackCompletionRequest = ChatCompletionRequest
                 .builder()
@@ -118,8 +128,8 @@ public class WebSocketServer {
         ChatCompletionResult result = service.createChatCompletion(feedbackCompletionRequest);
         ChatMessage response = result.getChoices().get(0).getMessage();
         conversationHistory.add(response);
-        aiServiceMap.remove(sid);
-        sessionMap.remove(sid);
+
+        redisTemplate.opsForHash().delete(sid);
     }
 
     /**
@@ -127,13 +137,9 @@ public class WebSocketServer {
      * @parem message
      */
     public void sendToClient(String sid, String message){
-        Session session = sessionMap.get(sid);
+        Session session = (Session) redisTemplate.opsForHash().get(sid,SESSIONKEY);
         if(session != null){
             session.getAsyncRemote().sendText(message);
         }
-    }
-
-    private List<ChatMessage> getConversationHistory(String sid) {
-
     }
 }

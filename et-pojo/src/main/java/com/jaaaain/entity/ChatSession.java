@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.io.Serializable;
 
 /**
@@ -15,12 +14,11 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Conversations implements Serializable {
-    private Integer conversationId;// 对话ID
-    private String userId;// 员工ID
+public class ChatSession implements Serializable {
+    private Integer sessionId;// 对话ID
+    private Integer userId;// 员工ID
     private Integer scenarioId;// 场景ID
     private LocalDateTime startTime;// 开始时间
     private LocalDateTime endTime;// 结束时间
-    private String content;// 对话内容
 }
 
