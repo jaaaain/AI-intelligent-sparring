@@ -1,0 +1,19 @@
+et:
+  datasource:
+    host: localhost
+    port: 3306
+    database: emp-train
+    username: root
+    password: 1234
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    secret-key: liuyaowen
+    # 设置jwt过期时间
+    ttl: 3600000 # 一个小时
+    # 设置前端传递过来的令牌名称
+    token-name: token
+
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0

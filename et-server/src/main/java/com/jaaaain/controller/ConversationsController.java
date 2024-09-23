@@ -1,9 +1,9 @@
 package com.jaaaain.controller;
 
-import com.jaaaain.entity.Conversations;
+import com.jaaaain.entity.ChatSession;
 import com.jaaaain.result.PageBean;
 import com.jaaaain.result.Result;
-import com.jaaaain.service.ConversationsService;
+import com.jaaaain.service.ChatSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class ConversationsController {
 
     @Autowired
-    private ConversationsService conversationsService;
+    private ChatSessionService chatSessionService;
 
     /**
      * 根据用户ID查询历史对话列表
@@ -27,7 +27,7 @@ public class ConversationsController {
     public Result list(@PathVariable("user_id") String userId,
                        @RequestParam(defaultValue = "1") Integer page,
                        @RequestParam(defaultValue = "10") Integer size) {
-        PageBean pageBean = conversationsService.queryByUserId(page,size,userId);
+        PageBean pageBean = chatSessionService.queryByUserId(page,size,userId);
         return Result.success(pageBean);
     }
 
@@ -38,29 +38,29 @@ public class ConversationsController {
      */
     @GetMapping("/conversations/{conversations_id}")
     public Result queryById(@PathVariable("conversations_id") Integer id) {
-        Conversations conversations = conversationsService.queryById(id);
-        return Result.success(conversations);
+        ChatSession chatSession = chatSessionService.queryById(id);
+        return Result.success(chatSession);
     }
 
-    /**
-     * 新增数据
-     * @param conversations 实体
-     * @return 新增结果
-     */
-    @PostMapping("/conversations")
-    public Result add(Conversations conversations) {
-        conversationsService.insert(conversations);
-        return Result.success();
-    }
+//    /**
+//     * 新增数据
+//     * @param chatSession 实体
+//     * @return 新增结果
+//     */
+//    @PostMapping("/conversations")
+//    public Result add(ChatSession chatSession) {
+//        chatSessionService.newChatSession(chatSession);
+//        return Result.success();
+//    }
 
     /**
      * 编辑数据
-     * @param conversations 实体
+     * @param chatSession 实体
      * @return 编辑结果
      */
     @PutMapping("/conversations/{conversations_id}")
-    public Result edit(Conversations conversations) {
-        conversationsService.update(conversations);
+    public Result edit(ChatSession chatSession) {
+        chatSessionService.update(chatSession);
         return Result.success();
     }
 }

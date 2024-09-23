@@ -1,7 +1,8 @@
 package com.jaaaain.mapper;
 
 import com.github.pagehelper.Page;
-import com.jaaaain.entity.Conversations;
+import com.jaaaain.entity.ChatSession;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -18,14 +19,14 @@ public interface ConversationsMapper {
      * @param conversationId 主键
      * @return 实例对象
      */
-    Conversations queryById(Integer conversationId);
+    ChatSession queryById(Integer conversationId);
 
     /**
      * 查询指定行数据
-     * @param conversations 查询条件
+     * @param chatSession 查询条件
      * @return 对象列表
      */
-    List<Conversations> queryByLimit(Conversations conversations);
+    List<ChatSession> queryByLimit(ChatSession chatSession);
 
     /**
      * 通过主键删除数据
@@ -36,24 +37,25 @@ public interface ConversationsMapper {
     
     /**
      * 新增数据
-     * @param conversations 实例对象
+     * @param chatSession 实例对象
      * @return 影响行数
      */
-    int insert(Conversations conversations);
+    @Insert("insert into chatsession (session_id, user_id, scenario_id, start_time) value (#{chatSession.sessionId},#{chatSession.userId},#{chatSession.scenarioId},NOW())")
+    int insert(ChatSession chatSession);
 
     /**
      * 批量新增数据（foreach）
      * @param entities List<Conversations> 实例对象列表
      * @return 影响行数
      */
-    int insertBatch(List<Conversations> entities);
+    int insertBatch(List<ChatSession> entities);
 
     /**
      * 修改数据
-     * @param conversations 实例对象
+     * @param chatSession 实例对象
      * @return 影响行数
      */
-    int update(Conversations conversations);
+    int update(ChatSession chatSession);
 
     /**
      * 批量更新数据（foreach）
@@ -61,14 +63,14 @@ public interface ConversationsMapper {
      * @return 影响行数
      * @throws org.springframework.jdbc.BadSqlGrammarException 入参是空List的时候会抛SQL语句错误的异常
      */
-    int UpdateBatch(List<Conversations> entities);
+    int UpdateBatch(List<ChatSession> entities);
 
     /**
      * 根据用户ID查询对话记录
      * @param userId
      * @return
      */
-    @Select("select * from conversations where user_id = #{userId}")
-    Page<Conversations> queryByUserId(String userId);
+    @Select("select * from ChatSession where user_id = #{userId}")
+    Page<ChatSession> queryByUserId(String userId);
 }
 

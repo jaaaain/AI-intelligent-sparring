@@ -2,10 +2,10 @@ package com.jaaaain.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.jaaaain.entity.Conversations;
+import com.jaaaain.entity.ChatSession;
 import com.jaaaain.mapper.ConversationsMapper;
 import com.jaaaain.result.PageBean;
-import com.jaaaain.service.ConversationsService;
+import com.jaaaain.service.ChatSessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * @since 2024-07-23 16:34:25
  */
 @Service("conversationsService")
-public class ConversationsServiceImpl implements ConversationsService {
+public class ChatSessionServiceImpl implements ChatSessionService {
 
     @Autowired
     private ConversationsMapper conversationsMapper;
@@ -27,7 +27,7 @@ public class ConversationsServiceImpl implements ConversationsService {
      * @return 实例对象
      */
     @Override
-    public Conversations queryById(Integer conversationId) {
+    public ChatSession queryById(Integer conversationId) {
         return conversationsMapper.queryById(conversationId);
     }
 
@@ -39,32 +39,37 @@ public class ConversationsServiceImpl implements ConversationsService {
     @Override
     public PageBean queryByUserId(Integer page, Integer size, String userId) {
         PageHelper.startPage(page, size); // 将下一条搜索改为查count和limit两条
-        List<Conversations> list = conversationsMapper.queryByUserId(userId);  // 得到的数据直接为PageBean类型
-        Page<Conversations> p = (Page<Conversations>) list;  // 强制类型转换
+        List<ChatSession> list = conversationsMapper.queryByUserId(userId);  // 得到的数据直接为PageBean类型
+        Page<ChatSession> p = (Page<ChatSession>) list;  // 强制类型转换
         PageBean pageBean = new PageBean(p.getTotal(),p.getResult());
         return pageBean;
     }
 
     /**
-     * 新增数据
-     * @param conversations 实例对象
-     * @return 实例对象
+     * 新增对话
+      * @param sessionid
+     * @param userid
+     * @param scenarioid
+     * @return
      */
-    @Override
-    public Conversations insert(Conversations conversations) {
-        conversationsMapper.insert(conversations);
-        return conversations;
+    public ChatSession newChatSession(Integer sessionid, Integer userid, Integer scenarioid) {
+        ChatSession chatSession = new ChatSession();
+        chatSession.setSessionId(sessionid);
+        chatSession.setUserId(userid);
+        chatSession.setScenarioId(scenarioid);
+        conversationsMapper.insert(chatSession);
+        return chatSession;
     }
 
     /**
      * 修改数据
-     * @param conversations 实例对象
+     * @param chatSession 实例对象
      * @return 实例对象
      */
     @Override
-    public Conversations update(Conversations conversations) {
-        conversationsMapper.update(conversations);
-        return queryById(conversations.getConversationId());
+    public ChatSession update(ChatSession chatSession) {
+        conversationsMapper.update(chatSession);
+        return queryById(chatSession.getSessionId());
     }
 
     /**

@@ -3,16 +3,16 @@
 <mapper namespace="com.jaaaain.mapper.ConversationsMapper">
 
     <!--查询单个-->
-    <select id="queryById" resultType="com.jaaaain.entity.Conversations">
+    <select id="queryById" resultType="com.jaaaain.entity.ChatSession">
         select *
-        from conversations
-        where conversation_id = #{conversationId}
+        from ChatSession
+        where session_id = #{conversationId}
     </select>
 
     <!--查询指定行数据-->
-    <select id="queryByLimit" resultType="com.jaaaain.entity.Conversations">
+    <select id="queryByLimit" resultType="com.jaaaain.entity.ChatSession">
         select *
-        from conversations
+        from ChatSession
         <where>
             <if test="conversationId != null">
                 and conversation_id = #{conversationId}
@@ -37,13 +37,13 @@
     </select>
 
     <!--新增所有列-->
-    <insert id="insert" keyProperty="conversationId" useGeneratedKeys="true">
-        insert into conversations(user_idscenario_idstart_timeend_timecontent)
-        values (#{userId}#{scenarioId}#{startTime}#{endTime}#{content})
-    </insert>
+<!--    <insert id="insert" keyProperty="conversationId" useGeneratedKeys="true">-->
+<!--        insert into chatSession(user_idscenario_idstart_timeend_timecontent)-->
+<!--        values (#{userId}#{scenarioId}#{startTime}#{endTime}#{content})-->
+<!--    </insert>-->
 
     <insert id="insertBatch" keyProperty="conversationId" useGeneratedKeys="true">
-        insert into conversations(user_idscenario_idstart_timeend_timecontent)
+        insert into chatSession(user_idscenario_idstart_timeend_timecontent)
         values
         <foreach collection="entities" item="entity" separator=",">
         (#{entity.userId}#{entity.scenarioId}#{entity.startTime}#{entity.endTime}#{entity.content})
@@ -51,7 +51,7 @@
     </insert>
 
     <insert id="UpdateBatch" keyProperty="conversationId" useGeneratedKeys="true">
-        insert into conversations(user_idscenario_idstart_timeend_timecontent)
+        insert into chatSession(user_idscenario_idstart_timeend_timecontent)
         values
         <foreach collection="entities" item="entity" separator=",">
             (#{entity.userId}#{entity.scenarioId}#{entity.startTime}#{entity.endTime}#{entity.content})
@@ -62,7 +62,7 @@ user_id = values(user_id)scenario_id = values(scenario_id)start_time = values(st
 
     <!--通过主键修改数据-->
     <update id="update">
-        update conversations
+        update ChatSession
         <set>
             <if test="userId != null and userId != ''">
                 user_id = #{userId},
@@ -85,7 +85,7 @@ user_id = values(user_id)scenario_id = values(scenario_id)start_time = values(st
 
     <!--通过主键删除-->
     <delete id="deleteById">
-        delete from conversations where conversation_id = #{conversationId}
+        delete from ChatSession where session_id = #{conversationId}
     </delete>
 
 </mapper>

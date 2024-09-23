@@ -22,9 +22,9 @@ CREATE TABLE scenarios (
     status INT NOT NULL DEFAULT '1' COMMENT '状态 0:禁用，1:启用'
 ) COMMENT='存储不同场景的详细信息';
 
-drop table if exists `conversations`;
+drop table if exists ChatSession;
 -- 创建对话记录表
-CREATE TABLE conversations (
+CREATE TABLE chatSession (
     conversation_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '对话ID',
     user_id VARCHAR(6) COMMENT '员工ID',
     scenario_id INT NOT NULL COMMENT '场景ID',
