@@ -11,12 +11,7 @@
         where user_id = #{id}
     </select>
 
-    <!--通过主键删除-->
-    <delete id="deleteById">
-        delete
-        from user
-        where user_id = #{id}
-    </delete>
+
 
     <!--查询指定行数据-->
     <select id="queryAllByLimit" resultType="com.jaaaain.entity.User">
@@ -25,12 +20,6 @@
         <where>
             <if test="username != null and username != ''">
                 and username like concat("%",#{username},"%")
-            </if>
-            <if test="phone != null and phone != ''">
-                and phone like concat("%",#{phone},"%")
-            </if>
-            <if test="gender != null and gender != ''">
-                and gender = #{gender}
             </if>
             <if test="isAdmin != null">
                 and is_admin = #{isAdmin}
@@ -45,16 +34,11 @@
     </select>
 
     <!--新增所有列-->
-    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
-        insert into user(username,password,
-                         <if test="avator != null">avator,</if>
-                         <if test="phone != null">phone,</if>
-                         <if test="gender != null">gender,</if>create_time,update_time)
-        values (#{username},#{password},
-                <if test="avator != null">#{avator},</if>
-                <if test="phone != null">#{phone},</if>
-                <if test="gender != null">#{gender},</if>NOW(),NOW())
+    <insert id="insert" keyProperty="userId" useGeneratedKeys="true">
+        insert into user(username, password, create_time)
+        values (#{username}, #{password}, NOW())
     </insert>
+
 
     <!--通过主键修改数据-->
     <update id="update">
@@ -66,24 +50,32 @@
             <if test="password != null and password != ''">
                 password = #{password},
             </if>
-            <if test="avator != null and avator != ''">
-                avator = #{avator},
-            </if>
-            <if test="phone != null and phone != ''">
-                phone = #{phone},
-            </if>
-            <if test="gender != null and gender != ''">
-                gender = #{gender},
-            </if>
             <if test="createTime != null">
                 create_time = #{createTime},
             </if>
-            <if test="updateTime != null">
-                update_time = #{updateTime},
+            <if test="isAdmin != null">
+            is_admin = #{isAdmin},
             </if>
         </set>
-        where id = #{id}
+        where user_id = #{userId}
     </update>
+    <!--通过主键删除数据-->
+    <delete id="deleteById" parameterType="Integer">
+        DELETE FROM user WHERE user_id = #{id}
+    </delete>
+
+    <!--查询所有用户-->
+    <resultMap id="UserResultMap" type="com.jaaaain.entity.User">
+        <id column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="create_time" property="createTime"/>
+        <result column="is_admin" property="isAdmin"/>
+    </resultMap>
+
+    <select id="queryAllUsers" resultMap="UserResultMap">
+        SELECT * FROM user
+    </select>
 
 
 </mapper>

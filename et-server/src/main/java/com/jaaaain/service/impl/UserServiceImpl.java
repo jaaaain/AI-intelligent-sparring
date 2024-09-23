@@ -100,16 +100,46 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(User user) {
         userMapper.update(user);
-        return queryById(user.getUserId());
+        return queryById(String.valueOf(user.getUserId())); // 将 Integer 转为 String
     }
 
     /**
      * 通过主键删除数据
-     * @param userId 主键
+     * @param id 主键
      * @return 是否成功
      */
+
+
     @Override
-    public boolean deleteById(String userId) {
-        return userMapper.deleteById(userId) > 0;
+    public boolean deleteUserById(Integer id) {
+        int rows = userMapper.deleteById(id);
+        return rows > 0;
     }
+
+
+    /**
+     * 查询所有用户
+     * @return 用户列表
+     */
+    @Override
+    public List<User> queryAllUsers() {
+        return userMapper.queryAllUsers();
+    }
+
+    @Override
+    public boolean toggleAdmin(Integer userId) {
+        // 查询用户
+        User user = userMapper.queryById(userId);
+        if (user == null) {
+            return false; // 用户不存在
+        }
+
+        // 切换用户权限
+        user.setIsAdmin(user.getIsAdmin() == 0 ? 1 : 0);
+
+        // 更新用户状态
+        return userMapper.update(user) > 0;
+    }
+
+
 }

@@ -4,6 +4,8 @@ import com.jaaaain.dto.UserLoginDTO;
 import com.jaaaain.entity.User;
 import com.jaaaain.result.PageBean;
 
+import java.util.List;
+
 /**
  * 存储系统中所有用户的信息(Users)表服务接口
  * @since 2024-07-23 16:34:25
@@ -47,9 +49,18 @@ public interface UserService {
 
     /**
      * 通过主键删除数据
-     * @param userId 主键
+     * @param id 主键
      * @return 是否成功
      */
-    boolean deleteById(String userId);
+     // 删除用户
+    boolean deleteUserById(Integer id);
+    /**
+     * 查询所有用户
+     * @return 用户列表
+     */
+    List<User> queryAllUsers();
+
+    // 根据用户ID切换isAdmin状态
+    boolean toggleAdmin(Integer userId);
 
 }

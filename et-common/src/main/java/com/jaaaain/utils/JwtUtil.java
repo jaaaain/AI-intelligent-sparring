@@ -1,9 +1,6 @@
 package com.jaaaain.utils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -48,12 +45,23 @@ public class JwtUtil {
      * @param token     加密后的token
      * @return
      */
-    public static Claims parseJWT(String secretKey, String token) {
-        // 得到DefaultJwtParser
-        Claims claims = Jwts.parser()
-                .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))
-                .parseClaimsJws(token).getBody();
-        return claims;
+    public static Claims parseJWT(String token, String secretKey) {
+        try {
+            System.out.println("解析时的 token: " + token);
+            System.out.println("解析时的 secretKey: " + secretKey);
+
+            return Jwts.parser()
+                       .setSigningKey(secretKey.getBytes(StandardCharsets.UTF_8))  // 明确指定 UTF-8
+                       .parseClaimsJws(token)
+                       .getBody();
+        } catch (ExpiredJwtException e) {
+            throw new RuntimeException("Token expired");
+        } catch (SignatureException e) {
+            throw new RuntimeException("Invalid token signature");
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid token");
+        }
     }
+
 
 }

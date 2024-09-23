@@ -23,7 +23,7 @@ public interface UserMapper {
      * @param id 主键
      * @return 影响行数
      */
-    int deleteById(String id);
+    int deleteById(Integer id);
 
     /**
      * 条件查询指定行数据
@@ -52,5 +52,14 @@ public interface UserMapper {
      * @return
      */
     User queryByUsername(String username);
+
+
+    List<User> queryAllUsers();
+
+    // 查询用户
+    User queryById(Integer userId);
+
+
+
 }
 

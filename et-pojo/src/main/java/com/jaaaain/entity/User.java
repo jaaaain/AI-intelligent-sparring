@@ -15,11 +15,12 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements Serializable {
-    private String userId;// 员工ID
+    private Integer userId;// 员工ID
     private String username;// 员工姓名
     private String password;// 密码（加密）
     private Integer isAdmin;// 管理员 0: Not admin, 1: Admin
     private Date createTime;// 注册时间
     private Date lastLogin;// 最后登录时间
+
 }
 

@@ -6,7 +6,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/emp-train
     username: root
-    password: 1234
+    password: 5457hzcx
 
   servlet:
     multipart:
@@ -41,7 +41,7 @@ sky:
     # 设置jwt过期时间
     ttl: 3600000 # 一个小时
     # 设置前端传递过来的令牌名称
-    token-name: token
+    token-name: Authorization
 
 logging:
   level:
