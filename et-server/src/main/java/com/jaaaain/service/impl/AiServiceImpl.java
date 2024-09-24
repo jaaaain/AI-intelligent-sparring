@@ -74,26 +74,6 @@ public class AiServiceImpl implements AiService {
         System.out.print(response.getContent());
     }
 
-//    private void GetResponse(List<ChatMessage> conversation_history){
-//        while (true) {
-//            ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
-//                    .builder()
-//                    .messages(conversation_history)
-//                    .model(chatProperties.getModel())
-//                    .maxTokens(150)
-//                    .temperature(chatProperties.getTemperature())
-//                    .build();
-//            ChatCompletionResult result = service.createChatCompletion(chatCompletionRequest);
-//            ChatMessage response = result.getChoices().get(0).getMessage();
-//            conversation_history.add(response);
-//
-//            System.out.print("Customer: " + response.getContent()+"\nEmployee: ");
-//            String nextLine = scanner.nextLine();
-//            if (nextLine.equalsIgnoreCase("exit")) {
-//                break;
-//            }
-//            conversation_history.add(new ChatMessage(ChatMessageRole.USER.value(), nextLine));
-//        }
-//    }
+
 
 }

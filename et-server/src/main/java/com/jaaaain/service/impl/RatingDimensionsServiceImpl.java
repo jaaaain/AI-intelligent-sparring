@@ -15,7 +15,7 @@ import java.util.List;
  * 存储评分维度信息(RatingDimensions)表服务实现类
  * @since 2024-07-23 16:34:25
  */
-@Service("ratingDimensionsService")
+@Service
 public class RatingDimensionsServiceImpl implements RatingDimensionsService {
 
     @Autowired

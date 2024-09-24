@@ -31,3 +31,4 @@ build/
 ### VS Code ###
 .vscode/
 /mobile-ai-training-master/
+/et-web/node_modules/

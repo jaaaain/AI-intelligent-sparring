@@ -65,14 +65,18 @@ public class WebSocketServer {
      */
     @OnOpen
     public void onOpen(Session session, @PathParam("sid") String sid) {
-        Integer option = Integer.valueOf(session.getQueryString().split("option=")[1]);
-        Integer uid = Integer.valueOf(session.getQueryString().split("uid=")[1]);
-        System.out.println("客户端：" + sid + "建立连接。option:" + option);
-        chatSessionService.newChatSession(Integer.valueOf(sid),uid,option);
+        // 获取参数
+        String[] params = session.getQueryString().split("&");
+        String option = params[0].split("=")[1];
+        String uid = params[1].split("=")[1];
+        System.out.println("客户端：" + uid + "  建立连接" + sid + "  option:" + option);
+        chatSessionService.newChatSession(sid,Integer.valueOf(uid),Integer.valueOf(option)); // 数据库插入新对话
+        sessionMap.put(sid, session);
+        System.out.println("ok1");
         // 创建一个ai对话服务
         OpenAiService service = new OpenAiService(chatProperties.getOpenaiKey());
-
-
+        aiserviceMap.put(sid,service);
+        System.out.println("ok2");
         // 初始化对话历史记录
         List<ChatMessage> conversationHistory = new ArrayList<>();
         conversationHistory.add(new ChatMessage("system", ChatConstant.SYSTEM_INITIAL));

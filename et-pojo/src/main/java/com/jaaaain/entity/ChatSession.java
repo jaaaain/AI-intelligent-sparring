@@ -15,7 +15,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatSession implements Serializable {
-    private Integer sessionId;// 对话ID
+    private String sessionId;// 对话ID
     private Integer userId;// 员工ID
     private Integer scenarioId;// 场景ID
     private LocalDateTime startTime;// 开始时间

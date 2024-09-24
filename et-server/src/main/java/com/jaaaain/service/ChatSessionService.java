@@ -30,14 +30,14 @@ public interface ChatSessionService {
      * @param scenarioid
      * @return
      */
-    ChatSession newChatSession(Integer sessionid, Integer userid, Integer scenarioid);
+    ChatSession newChatSession(String sessionid, Integer userid, Integer scenarioid);
 
     /**
      * 修改数据
      * @param chatSession 实例对象
      * @return 实例对象
      */
-    ChatSession update(ChatSession chatSession);
+//    ChatSession update(ChatSession chatSession);
 
     /**
      * 通过主键删除数据

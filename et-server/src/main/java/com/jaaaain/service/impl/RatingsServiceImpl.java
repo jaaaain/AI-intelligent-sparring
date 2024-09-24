@@ -15,7 +15,7 @@ import java.util.List;
  * 存储对话的评分结果(Ratings)表服务实现类
  * @since 2024-07-23 16:34:25
  */
-@Service("ratingsService")
+@Service
 public class RatingsServiceImpl implements RatingsService {
 
     @Autowired

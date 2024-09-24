@@ -13,7 +13,7 @@ import java.util.List;
  * @since 2024-07-17 15:24:50
  */
  @Mapper
-public interface ConversationsMapper {
+public interface ChatSessionMapper {
     /**
      * 通过ID查询单条数据
      * @param conversationId 主键
@@ -40,7 +40,7 @@ public interface ConversationsMapper {
      * @param chatSession 实例对象
      * @return 影响行数
      */
-    @Insert("insert into chatsession (session_id, user_id, scenario_id, start_time) value (#{chatSession.sessionId},#{chatSession.userId},#{chatSession.scenarioId},NOW())")
+    @Insert("insert into chatsession (session_id, user_id, scenario_id, start_time) value (#{sessionId},#{userId},#{scenarioId},NOW())")
     int insert(ChatSession chatSession);
 
     /**
