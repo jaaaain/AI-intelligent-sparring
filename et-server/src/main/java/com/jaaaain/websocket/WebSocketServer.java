@@ -91,7 +91,7 @@ public class WebSocketServer {
         conversationHistory.add(new ChatMessage("user", ChatConstant.EMPLOYEE_GREETING));
         conversationHistory.add(new ChatMessage("assistant", ChatConstant.TOO_SLOW));
         // 对话消息记录存入Redis
-        redisTemplate.opsForList().leftPushAll(sid,conversationHistory);
+        redisTemplate.opsForList().rightPushAll(sid,conversationHistory);
         System.out.println("conversationHistory: " + conversationHistory);
         // 发送抱怨开场白
         RetMsgVO aiGreetingMsgVO = new RetMsgVO("AI", "顾客抱怨: " + ChatConstant.TOO_SLOW);
@@ -105,24 +105,31 @@ public class WebSocketServer {
     @OnMessage
     public void onMessage(String message, @PathParam("sid") String sid) {
         System.out.println("收到来自客户端：" + sid + "的信息:" + message);
-        List<ChatMessage> conversationHistory = (List<ChatMessage>) redisTemplate.opsForList().range(sid,0,-1);
-
-        // 新增对应session的对话历史记录
-        ChatMessage userMessage = new ChatMessage("user", message);
-        conversationHistory.add(userMessage);
-        System.out.println("conversationHistory: " + conversationHistory);
-
         // 设置代理
         System.setProperty("http.proxyHost", chatProperties.getProxyHost());
         System.setProperty("http.proxyPort", chatProperties.getProxyPort());
         System.setProperty("https.proxyHost", chatProperties.getProxyHost());
         System.setProperty("https.proxyPort", chatProperties.getProxyPort());
+        if(message.equals("exit")){
+            System.out.println("对话结束，正在生成评分和反馈...");
+            // 新增对应session的对话历史记录
+            ChatMessage systemFeedback = new ChatMessage("system",ChatConstant.SYSTEM_FEEDBACK);
+            redisTemplate.opsForList().rightPush(sid,systemFeedback);
+        }
+        else{
+            // 新增对应session的对话历史记录
+            ChatMessage userMessage = new ChatMessage("user", message);
+            redisTemplate.opsForList().rightPush(sid,userMessage);
+        }
+        List<ChatMessage> conversationHistory = (List<ChatMessage>) redisTemplate.opsForList().range(sid,0,-1);
+        System.out.println("conversationHistory: " + conversationHistory);
+
 
         // AI通过对话历史记录生成回复
         ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest.builder()
                 .messages(conversationHistory)
                 .model(chatProperties.getModel())
-                .maxTokens(150)
+                .maxTokens(250)
                 .temperature(chatProperties.getTemperature())
                 .build();
         System.out.println("ok3");
@@ -130,7 +137,7 @@ public class WebSocketServer {
         ChatCompletionResult result = service.createChatCompletion(chatCompletionRequest);
         ChatMessage aiResponse = result.getChoices().get(0).getMessage();
         System.out.println("aiResponse: " + aiResponse);
-        redisTemplate.opsForList().leftPush(sid,aiResponse);
+        redisTemplate.opsForList().rightPush(sid,aiResponse);
 
         // Send AI response to client
         RetMsgVO aiReternMsg = new RetMsgVO("AI", aiResponse.getContent());
@@ -144,30 +151,8 @@ public class WebSocketServer {
     @OnClose
     public void onClose(@PathParam("sid") String sid) {
         System.out.println("连接断开:" + sid);
-        System.out.println("对话结束，正在生成评分和反馈...");
-        List<ChatMessage> conversationHistory = (List<ChatMessage>) redisTemplate.opsForList().range(sid,0,-1);
-        conversationHistory.add(new ChatMessage("system",ChatConstant.SYSTEM_FEEDBACK));
-
-
-        // 设置代理
-        System.setProperty("http.proxyHost", chatProperties.getProxyHost());
-        System.setProperty("http.proxyPort", chatProperties.getProxyPort());
-        System.setProperty("https.proxyHost", chatProperties.getProxyHost());
-        System.setProperty("https.proxyPort", chatProperties.getProxyPort());
-
-        ChatCompletionRequest feedbackCompletionRequest = ChatCompletionRequest
-                .builder()
-                .messages(conversationHistory)
-                .model(chatProperties.getModel())
-                .maxTokens(400)
-                .temperature(chatProperties.getTemperature())
-                .build();
-        OpenAiService service =  aiserviceMap.get(sid);
-        ChatCompletionResult result = service.createChatCompletion(feedbackCompletionRequest);
-        ChatMessage response = result.getChoices().get(0).getMessage();
-        redisTemplate.opsForList().leftPush(sid,response);
-
-
+        sessionMap.remove(sid);
+        aiserviceMap.remove(sid);
         redisTemplate.delete(sid);
     }
 

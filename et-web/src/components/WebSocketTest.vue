@@ -11,7 +11,7 @@
 
     <input v-model="messageContent" placeholder="Type a message...">
     <button @click="sendMessage">send</button>
-
+    <button @click="stopTrain">exit</button>
     <div v-for="(message, index) in messages" :key="index">
       <p><strong>{{ message.sender }}:</strong> {{ message.msg }}</p>
     </div>
@@ -27,7 +27,8 @@ export default {
       selectedOption: 1,
       messages: [],
       messageContent: '',
-      websocket: null
+      websocket: null,
+      isClosing: false
     };
   },
   mounted() {
@@ -49,12 +50,22 @@ export default {
         this.onMessageReceived(message);
       };
     },
-
+    stopTrain() {
+      this.isClosing = true;
+      this.websocket.send("exit");
+      // if (this.websocket) {
+      // }
+    },
     onMessageReceived(message) {
       console.log("ok");
       try {
         const parsedMessage = JSON.parse(message.data); // 解析 JSON 字符串
         this.messages.push(parsedMessage); // 将解析后的消息加入 messages 数组
+        if (this.isClosing == true) {
+          this.websocket.close(); // 关闭 WebSocket 连接
+          console.log("对话已结束，WebSocket 连接已关闭。");
+          this.isClosing=false;
+        }
       } catch (e) {
         console.error("消息解析失败: ", e);
       }
@@ -65,9 +76,9 @@ export default {
           sender: this.username,
           msg: this.messageContent
         };
-        this.websocket.send(JSON.stringify(message)); // websocket 发送消息
+        this.websocket.send(this.messageContent); // websocket 发送消息
         this.messages.push(message); // 消息历史
-        console.log(JSON.stringify(this.messages));
+        console.log(JSON.stringify(message));
         this.messageContent = ''; // 清空输入框
       }
     }
