@@ -4,7 +4,7 @@ import com.jaaaain.entity.ChatSession;
 import com.jaaaain.result.PageBean;
 
 /**
- * 存储用户与AI之间的对话记录(Conversations)表服务接口
+ * 存储用户与AI之间的对话记录服务接口
  * @since 2024-07-23 16:34:25
  */
 public interface ChatSessionService {

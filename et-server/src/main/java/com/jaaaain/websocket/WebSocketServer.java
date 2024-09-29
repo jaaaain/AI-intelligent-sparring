@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jaaaain.constant.ChatConstant;
 import com.jaaaain.properties.ChatProperties;
 import com.jaaaain.service.AiService;
+import com.jaaaain.service.ChatMessageService;
 import com.jaaaain.service.ChatSessionService;
 import com.jaaaain.vo.RetMsgVO;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
@@ -35,6 +36,7 @@ public class WebSocketServer {
     private static Map<String, Session> sessionMap = new HashMap<>();
     private static Map<String, OpenAiService> aiserviceMap = new HashMap<>();
 
+    private static ChatMessageService chatMessageService;
 //    @Autowired
     private static ChatSessionService chatSessionService; // 对话记录数据库存储
 //    @Autowired
@@ -44,8 +46,9 @@ public class WebSocketServer {
     private static ChatProperties chatProperties;
 
     @Autowired
-    public void SetWebSocketService(ChatSessionService chatSessionService, RedisTemplate redisTemplate,ChatProperties chatProperties) {
+    public void SetWebSocketService(ChatSessionService chatSessionService,ChatMessageService chatMessageService, RedisTemplate redisTemplate,ChatProperties chatProperties) {
         WebSocketServer.chatSessionService = chatSessionService;
+        WebSocketServer.chatMessageService = chatMessageService;
         WebSocketServer.redisTemplate = redisTemplate;
         WebSocketServer.chatProperties = chatProperties;
     }
@@ -90,6 +93,11 @@ public class WebSocketServer {
         conversationHistory.add(new ChatMessage("system", ChatConstant.SYSTEM_INITIAL));
         conversationHistory.add(new ChatMessage("user", ChatConstant.EMPLOYEE_GREETING));
         conversationHistory.add(new ChatMessage("assistant", ChatConstant.TOO_SLOW));
+
+        chatMessageService.newChatMessage(sid,ChatConstant.SYSTEM_INITIAL,"system");
+        chatMessageService.newChatMessage(sid,ChatConstant.EMPLOYEE_GREETING,"user");
+        chatMessageService.newChatMessage(sid,ChatConstant.TOO_SLOW,"assistant");
+
         // 对话消息记录存入Redis
         redisTemplate.opsForList().rightPushAll(sid,conversationHistory);
         System.out.println("conversationHistory: " + conversationHistory);
@@ -114,11 +122,13 @@ public class WebSocketServer {
             System.out.println("对话结束，正在生成评分和反馈...");
             // 新增对应session的对话历史记录
             ChatMessage systemFeedback = new ChatMessage("system",ChatConstant.SYSTEM_FEEDBACK);
+            chatMessageService.newChatMessage(sid,ChatConstant.SYSTEM_FEEDBACK,"system");
             redisTemplate.opsForList().rightPush(sid,systemFeedback);
         }
         else{
             // 新增对应session的对话历史记录
             ChatMessage userMessage = new ChatMessage("user", message);
+            chatMessageService.newChatMessage(sid,message,"user");
             redisTemplate.opsForList().rightPush(sid,userMessage);
         }
         List<ChatMessage> conversationHistory = (List<ChatMessage>) redisTemplate.opsForList().range(sid,0,-1);
