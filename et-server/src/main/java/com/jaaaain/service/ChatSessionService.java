@@ -2,6 +2,7 @@ package com.jaaaain.service;
 
 import com.jaaaain.entity.ChatSession;
 import com.jaaaain.result.PageBean;
+import com.jaaaain.vo.RetSessionVO;
 
 /**
  * 存储用户与AI之间的对话记录服务接口
@@ -9,40 +10,18 @@ import com.jaaaain.result.PageBean;
  */
 public interface ChatSessionService {
 
-    /**
-     * 通过ID查询单条数据
-     * @param conversationId 主键
-     * @return 实例对象
-     */
-    ChatSession queryById(Integer conversationId);
+    PageBean queryForSessions(Integer page, Integer size);
 
-    /**
-     * 根据用户ID查询对话记录
-     * @param userId 用户ID
-     * @return 查询结果
-     */
-    PageBean queryByUserId(Integer page, Integer size, String userId);
+    ChatSession querySessionById(String sessionId);
 
     /**
      * 新增对话
-     * @param sessionid
+     * @param sessionId
      * @param userid
-     * @param scenarioid
+     * @param scenarioId
      * @return
      */
-    ChatSession newChatSession(String sessionid, Integer userid, Integer scenarioid);
+    ChatSession newChatSession(String sessionId, Integer userid, Integer scenarioId);
 
-    /**
-     * 修改数据
-     * @param chatSession 实例对象
-     * @return 实例对象
-     */
-//    ChatSession update(ChatSession chatSession);
-
-    /**
-     * 通过主键删除数据
-     * @param conversationId 主键
-     * @return 是否成功
-     */
-    boolean deleteById(Integer conversationId);
+    void deleteSession(String sessionId);
 }

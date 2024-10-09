@@ -1,7 +1,6 @@
 package com.jaaaain.service;
 
 import com.jaaaain.entity.Ratings;
-import com.jaaaain.result.PageBean;
 
 /**
  * 存储对话的评分结果(Ratings)表服务接口
@@ -13,26 +12,11 @@ public interface RatingsService {
      * @param ratingId 主键
      * @return 实例对象
      */
-    Ratings queryById(Integer ratingId);
+    Ratings queryByRatingId(Integer ratingId);
 
-    /**
-     * 新增数据
-     * @param ratings 实例对象
-     * @return 实例对象
-     */
-    Ratings insert(Ratings ratings);
+    Ratings queryBySessionId(String sessionId);
 
-    /**
-     * 修改数据
-     * @param ratings 实例对象
-     * @return 实例对象
-     */
-    Ratings update(Ratings ratings);
+    boolean newRating(String sid, String aiResponse);
 
-    /**
-     * 通过主键删除数据
-     * @param ratingId 主键
-     * @return 是否成功
-     */
     boolean deleteById(Integer ratingId);
 }

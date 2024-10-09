@@ -37,10 +37,10 @@
     </select>
 
     <!--新增所有列-->
-<!--    <insert id="insert" keyProperty="conversationId" useGeneratedKeys="true">-->
-<!--        insert into chatSession(user_idscenario_idstart_timeend_timecontent)-->
+<!--    <addUser id="addUser" keyProperty="conversationId" useGeneratedKeys="true">-->
+<!--        addUser into chatSession(user_idscenario_idstart_timeend_timecontent)-->
 <!--        values (#{userId}#{scenarioId}#{startTime}#{endTime}#{content})-->
-<!--    </insert>-->
+<!--    </addUser>-->
 
     <insert id="insertBatch" keyProperty="conversationId" useGeneratedKeys="true">
         insert into chatSession(user_idscenario_idstart_timeend_timecontent)
@@ -82,11 +82,6 @@ user_id = values(user_id)scenario_id = values(scenario_id)start_time = values(st
         </set>
         where conversation_id = #{conversationId}
     </update>
-
-    <!--通过主键删除-->
-    <delete id="deleteById">
-        delete from ChatSession where session_id = #{conversationId}
-    </delete>
 
 </mapper>
 

@@ -43,21 +43,9 @@ aliyun:
 chat:
   proxy-host: 127.0.0.1
   proxy-port: 10809
-  openai-key: # 设置openai的key
+  openai-key:  # 设置openai的key
   model: gpt-4
   temperature: 0.7
-
-sky:
-  jwt:
-    # 设置jwt签名加密时使用的秘钥
-    secret-key: liuyaowen
-    # 设置jwt过期时间
-    ttl: 3600000 # 一个小时
-    # 设置前端传递过来的令牌名称
-    token-name: Authorization
-
-
-
 
 logging:
   level:

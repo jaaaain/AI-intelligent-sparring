@@ -1,5 +1,6 @@
 package com.jaaaain.mapper;
 
+import com.jaaaain.dto.UserCreateDTO;
 import com.jaaaain.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -37,7 +38,7 @@ public interface UserMapper {
      * @param user 实例对象
      * @return 影响行数
      */
-    int insert(User user);
+    int insert(UserCreateDTO user);
 
     /**
      * 修改数据

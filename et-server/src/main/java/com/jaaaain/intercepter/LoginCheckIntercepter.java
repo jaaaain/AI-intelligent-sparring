@@ -1,19 +1,20 @@
 package com.jaaaain.intercepter;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jaaaain.constant.JwtClaimsConstant;
+import com.jaaaain.context.BaseContext;
+import com.jaaaain.exception.BizExceptionEnum;
 import com.jaaaain.properties.JwtProPerties;
 import com.jaaaain.result.Result;
 import com.jaaaain.utils.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -26,50 +27,44 @@ public class LoginCheckIntercepter implements HandlerInterceptor {
 
     @Override // 目标资源方法执行前，判断是否放行
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
-        System.out.println("进入拦截器，拦截请求路径: " + request.getRequestURL().toString());
+        log.info("登录拦截器: preHandle");
         // 1. 获取请求路径
         String url = request.getRequestURL().toString();
-        log.info("请求的路径: {}", url);
-        // 2. 判断是否放行（例如登录路径不需要拦截）
-        if (url.contains("login")) {
-            log.info("登录操作, 放行");
-            return true;
-        }
+        log.info("进入拦截器，请求的路径: {}", url);
 
-        String token = request.getHeader("Authorization");
+        String token = request.getHeader(jwtProPerties.getTokenName());
         System.out.println("拦截器中获取到的 Authorization: " + token);
 
         // 检查 token 是否为空
         if (token == null || !token.startsWith("Bearer ")) {
             System.out.println("没有有效的 Authorization token");
-            Result error = Result.error("NOT_LOGIN");
+            Result error = Result.error(BizExceptionEnum.NOT_LOGIN.getMsg());
             response.getWriter().write(JSONObject.toJSONString(error));
             return false;
         }
-        log.info("登录拦截器: preHandle");
-
-
-        // 3. 获取请求头中的令牌（token）
-        String jwt = request.getHeader(jwtProPerties.getTokenName());
 
         // 4. 去掉 'Bearer ' 前缀
-        jwt = jwt.substring(7); // 去掉 'Bearer ' 前缀
+        token = token.substring(7); // 去掉 'Bearer ' 前缀
         // 5. 验证令牌
         try {
-            // **这里修正 Token 解析的参数顺序**: token 在前，secretKey 在后
-            Claims claim = JwtUtil.parseJWT(jwt, jwtProPerties.getSecretKey());
-            System.out.println("解析时的 secretKey: " + jwtProPerties.getSecretKey());
+            // 这里修正 Token 解析的参数顺序: token 在前，secretKey 在后
+            Claims claim = JwtUtil.parseJWT(token, jwtProPerties.getSecretKey());
             log.info("解析成功: {}", claim);
+            Long userId = Long.valueOf(claim.get(JwtClaimsConstant.USER_ID).toString());
+            Integer isAdmin = Integer.valueOf(claim.get(JwtClaimsConstant.IS_ADMIN).toString());
+            log.info("当前用户的id: {}; 是否为管理员: {}", userId, isAdmin);
+            // 存储当前进程的身份数据
+            BaseContext.setCurrentId(userId);
+            BaseContext.setCurrentRole(isAdmin);
         } catch (ExpiredJwtException e) {
             log.info("令牌过期，返回未登录的信息: {}", e.getMessage());
-            return sendErrorResponse(response, "TOKEN_EXPIRED");
+            return sendErrorResponse(response, BizExceptionEnum.TOKEN_EXPIRED.getMsg());
         } catch (SignatureException e) {
             log.info("令牌签名无效，返回未登录的信息: {}", e.getMessage());
-            return sendErrorResponse(response, "INVALID_SIGNATURE");
+            return sendErrorResponse(response, BizExceptionEnum.TOKEN_INVALID.getMsg());
         } catch (Exception e) {
             log.info("令牌解析失败，返回未登录的信息: {}", e.getMessage());
-            return sendErrorResponse(response, "NOT_LOGIN");
+            return sendErrorResponse(response, BizExceptionEnum.PARSING_FAILED.getMsg());
         }
 
 

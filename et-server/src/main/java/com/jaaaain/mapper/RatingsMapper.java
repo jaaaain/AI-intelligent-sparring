@@ -1,7 +1,9 @@
 package com.jaaaain.mapper;
 
 import com.jaaaain.entity.Ratings;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -16,20 +18,17 @@ public interface RatingsMapper {
      * @param ratingId 主键
      * @return 实例对象
      */
-    Ratings queryById(Integer ratingId);
-
-    /**
-     * 查询指定行数据
-     * @param ratings 查询条件
-     * @return 对象列表
-     */
-    List<Ratings> queryByLimit(Ratings ratings);
+    @Select("select * from ratings where rating_id=#{ratingId}")
+    Ratings queryByRatingId(Integer ratingId);
+    @Select("select * from ratings where session_id=#{sessionId}")
+    Ratings queryBysessionId(String sessionId);
 
     /**
      * 通过主键删除数据
      * @param ratingId 主键
      * @return 影响行数
      */
+    @Delete("delete from ratings where rating_id = #{ratingId}")
     int deleteById(Integer ratingId);
     
     /**
@@ -39,27 +38,5 @@ public interface RatingsMapper {
      */
     int insert(Ratings ratings);
 
-    /**
-     * 批量新增数据（foreach）
-     * @param entities List<Ratings> 实例对象列表
-     * @return 影响行数
-     */
-    int insertBatch(List<Ratings> entities);
-
-    /**
-     * 修改数据
-     * @param ratings 实例对象
-     * @return 影响行数
-     */
-    int update(Ratings ratings);
-
-    /**
-     * 批量更新数据（foreach）
-     * @param entities List<Ratings> 实例对象列表
-     * @return 影响行数
-     * @throws org.springframework.jdbc.BadSqlGrammarException 入参是空List的时候会抛SQL语句错误的异常
-     */
-    int UpdateBatch(List<Ratings> entities);
-    
 }
 

@@ -2,6 +2,7 @@ package com.jaaaain.mapper;
 
 import com.github.pagehelper.Page;
 import com.jaaaain.entity.ChatSession;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -16,24 +17,18 @@ import java.util.List;
 public interface ChatSessionMapper {
     /**
      * 通过ID查询单条数据
-     * @param conversationId 主键
+     * @param sessionId 主键
      * @return 实例对象
      */
-    ChatSession queryById(Integer conversationId);
-
-    /**
-     * 查询指定行数据
-     * @param chatSession 查询条件
-     * @return 对象列表
-     */
-    List<ChatSession> queryByLimit(ChatSession chatSession);
+    ChatSession queryById(String sessionId);
 
     /**
      * 通过主键删除数据
-     * @param conversationId 主键
+     * @param sessionId 主键
      * @return 影响行数
      */
-    int deleteById(Integer conversationId);
+    @Delete("delete from chatsession where session_id=#{sessionId}")
+    int deleteById(String sessionId);
     
     /**
      * 新增数据
@@ -44,33 +39,19 @@ public interface ChatSessionMapper {
     int insert(ChatSession chatSession);
 
     /**
-     * 批量新增数据（foreach）
-     * @param entities List<Conversations> 实例对象列表
-     * @return 影响行数
-     */
-    int insertBatch(List<ChatSession> entities);
-
-    /**
-     * 修改数据
-     * @param chatSession 实例对象
-     * @return 影响行数
-     */
-    int update(ChatSession chatSession);
-
-    /**
-     * 批量更新数据（foreach）
-     * @param entities List<Conversations> 实例对象列表
-     * @return 影响行数
-     * @throws org.springframework.jdbc.BadSqlGrammarException 入参是空List的时候会抛SQL语句错误的异常
-     */
-    int UpdateBatch(List<ChatSession> entities);
-
-    /**
      * 根据用户ID查询对话记录
      * @param userId
      * @return
      */
     @Select("select * from ChatSession where user_id = #{userId}")
-    Page<ChatSession> queryByUserId(String userId);
+    Page<ChatSession> queryByUserId(Long userId);
+
+    /**
+     * 查询对话记录
+     * @return
+     */
+    @Select("select * from ChatSession")
+    Page<ChatSession> queryAll();
+
 }
 

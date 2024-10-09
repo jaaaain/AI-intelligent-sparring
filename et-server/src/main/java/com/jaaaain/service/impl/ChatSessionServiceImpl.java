@@ -2,12 +2,19 @@ package com.jaaaain.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.jaaaain.annotation.CheckPower;
+import com.jaaaain.context.BaseContext;
 import com.jaaaain.entity.ChatSession;
+import com.jaaaain.mapper.ChatMessageMpper;
 import com.jaaaain.mapper.ChatSessionMapper;
 import com.jaaaain.result.PageBean;
+import com.jaaaain.result.Result;
 import com.jaaaain.service.ChatSessionService;
+import com.jaaaain.vo.RetSessionVO;
+import jakarta.websocket.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,65 +27,53 @@ public class ChatSessionServiceImpl implements ChatSessionService {
 
     @Autowired
     private ChatSessionMapper chatSessionMapper;
+    @Autowired
+    private ChatMessageMpper chatMessageMpper;
 
-    /**
-     * 通过ID查询单条数据
-     * @param conversationId 主键
-     * @return 实例对象
-     */
     @Override
-    public ChatSession queryById(Integer conversationId) {
-        return chatSessionMapper.queryById(conversationId);
-    }
-
-    /**
-     * 根据用户ID查询对话记录
-     * @param userId 用户ID
-     * @return 查询结果
-     */
-    @Override
-    public PageBean queryByUserId(Integer page, Integer size, String userId) {
+    public PageBean queryForSessions(Integer page, Integer size){
+        Long currentUserId = BaseContext.getCurrentId();
+        Integer currentRole = BaseContext.getCurrentRole();
         PageHelper.startPage(page, size); // 将下一条搜索改为查count和limit两条
-        List<ChatSession> list = chatSessionMapper.queryByUserId(userId);  // 得到的数据直接为PageBean类型
+        List<ChatSession> list;
+        if (currentRole==1) {
+            list = chatSessionMapper.queryAll();  // 得到的数据直接为PageBean类型
+        }else{
+            list = chatSessionMapper.queryByUserId(currentUserId);
+        }
         Page<ChatSession> p = (Page<ChatSession>) list;  // 强制类型转换
         PageBean pageBean = new PageBean(p.getTotal(),p.getResult());
         return pageBean;
     }
 
-    /**
-     * 新增对话
-      * @param sessionid
-     * @param userid
-     * @param scenarioid
-     * @return
-     */
-    public ChatSession newChatSession(String sessionid, Integer userid, Integer scenarioid) {
-        ChatSession chatSession = new ChatSession();
-        chatSession.setSessionId(sessionid);
-        chatSession.setUserId(userid);
-        chatSession.setScenarioId(scenarioid);
-        chatSessionMapper.insert(chatSession);
-        return chatSession;
+    @Override
+    @CheckPower("querySessionById")
+    public ChatSession querySessionById(String sessionId) {
+        return chatSessionMapper.queryById(sessionId);
+    }
+
+    @Override
+    @Transactional
+    @CheckPower("deleteSession")
+    public void deleteSession(String sessionId) {
+        chatSessionMapper.deleteById(sessionId);
+        chatMessageMpper.deleteBySid(sessionId);
     }
 
     /**
-     * 修改数据
-     * @param chatSession 实例对象
-     * @return 实例对象
-     */
-//    @Override
-//    public ChatSession update(ChatSession chatSession) {
-//        conversationsMapper.update(chatSession);
-//        return queryById(chatSession.getSessionId());
-//    }
-
-    /**
-     * 通过主键删除数据
-     * @param conversationId 主键
-     * @return 是否成功
+     * 新增对话
+     * @param sessionId
+     * @param userId
+     * @param scenarioId
+     * @return
      */
     @Override
-    public boolean deleteById(Integer conversationId) {
-        return chatSessionMapper.deleteById(conversationId) > 0;
+    public ChatSession newChatSession(String sessionId, Integer userId, Integer scenarioId) {
+        ChatSession chatSession = new ChatSession();
+        chatSession.setSessionId(sessionId);
+        chatSession.setUserId(userId);
+        chatSession.setScenarioId(scenarioId);
+        chatSessionMapper.insert(chatSession);
+        return chatSession;
     }
 }

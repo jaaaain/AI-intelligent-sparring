@@ -1,5 +1,7 @@
 package com.jaaaain.mapper;
 
+import com.jaaaain.dto.ScenariosCreateDTO;
+import com.jaaaain.dto.ScenariosQueryDTO;
 import com.jaaaain.entity.Scenarios;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -14,31 +16,21 @@ import java.util.List;
 public interface ScenariosMapper {
     /**
      * 通过ID查询单条数据
-     * @param scenarioId 主键
-     * @return 实例对象
      */
+    @Select("select * from scenarios where scenario_id=#{scenarioId} and status>=0")
     Scenarios queryById(Integer scenarioId);
 
-    /**
-     * 查询所有数据
-     * @return
-     */
-    @Select("select * from scenarios")
-    List<Scenarios> queryAll();
+    @Select("select * from scenarios where scenario_name=#{scenarioName} and status>=0")
+    List<Scenarios> queryByName(String scenarioName);
 
-    /**
-     * 查询启用的场景信息
-     * @return
-     */
-    @Select("select * from scenarios where status = 1")
-    List<Scenarios> queryEnabled();
+    List<Scenarios> queryList(ScenariosQueryDTO scenariosQueryDTO);
 
     /**
      * 新增数据
-     * @param scenarios 实例对象
+     * @param scenariosCreateDTO 实例对象
      * @return 影响行数
      */
-    int insert(Scenarios scenarios);
+    int insert(ScenariosCreateDTO scenariosCreateDTO);
 
     /**
      * 修改数据

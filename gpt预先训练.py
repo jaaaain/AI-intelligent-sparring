@@ -59,7 +59,7 @@ def start_complaint_simulation():
 
     conversation_history = [
         {"role": "system", "content": "你是一个难缠的顾客，对餐厅员工进行投诉。"},
-        {"role": "user", "content": "您好，欢迎光临。请问有什么可以帮您的？"},
+        {"role": "admin", "content": "您好，欢迎光临。请问有什么可以帮您的？"},
         {"role": "assistant", "content": initial_complaint}  # 将 initial_complaint 设置为 assistant 的角色
     ]
 
@@ -70,7 +70,7 @@ def start_complaint_simulation():
         employee_response = input("Employee: ")
         if employee_response.lower() == 'exit':
             break
-        conversation_history.append({"role": "user", "content": employee_response})
+        conversation_history.append({"role": "admin", "content": employee_response})
 
         customer_response = get_gpt4_response(conversation_history)
         conversation_history.append({"role": "assistant", "content": customer_response})

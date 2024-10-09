@@ -1,79 +1,128 @@
 package com.jaaaain.service.impl;
 
 import com.jaaaain.constant.ChatConstant;
+import com.jaaaain.entity.Scenarios;
 import com.jaaaain.properties.ChatProperties;
-import com.jaaaain.service.AiService;
+import com.jaaaain.service.*;
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatCompletionResult;
 import com.theokanning.openai.completion.chat.ChatMessage;
-import com.theokanning.openai.completion.chat.ChatMessageRole;
 import com.theokanning.openai.service.OpenAiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 @Service
 public class AiServiceImpl implements AiService {
 
     @Autowired
     private ChatProperties chatProperties;
+    @Autowired
+    private ScenariosService scenariosService;
+    @Autowired
+    private ChatMessageService chatMessageService;
+    @Autowired
+    private ChatSessionService chatSessionService;
+    @Autowired
+    private RatingsService ratingsService;
+    @Autowired
+    private RedisTemplate redisTemplate; // 使用 Redis 哈希存储每个 sid 对应的 conversationHistory
 
-    public void Chat() {
+    private static OpenAiService service;
+
+    @Override
+    public String newOpenAiService(String sid, Integer option, Integer uid) {
+        // 实例化ai对话服务
+        service = new OpenAiService(chatProperties.getOpenaiKey());
+        // 从数据库获取对应场景的抱怨开场白
+        Scenarios scenarios = scenariosService.queryById(option);
+        String complainMsg = scenarios.getDescription();
+
+        // 初始化对话历史记录
+        List<ChatMessage> conversationHistory = new ArrayList<>();
+        conversationHistory.add(new ChatMessage("system", ChatConstant.SYSTEM_INITIAL));
+        conversationHistory.add(new ChatMessage("assistant", complainMsg));
+
+        // 存储操作
+        chatSessionService.newChatSession(sid,uid,option); // 数据库插入新对话
+        chatMessageService.newChatMessage(sid,complainMsg,"顾客");
+        redisTemplate.opsForList().rightPushAll(sid,conversationHistory);// 对话消息记录存入Redis
+
+        System.out.println("conversationHistory: " + conversationHistory);
+
+        return complainMsg;
+    }
+
+    @Override
+    public String getResponse(String sid, String message) {
+        setProperty();
+        // 新增对应session的对话记录
+        ChatMessage userMessage = new ChatMessage("user", message);
+        redisTemplate.opsForList().rightPush(sid,userMessage);
+        // 获取所有历史消息
+        List<ChatMessage> conversationHistory = (List<ChatMessage>) redisTemplate.opsForList().range(sid,0,-1);
+        System.out.println("conversationHistory: " + conversationHistory);
+
+        // 获取AI回复
+        ChatMessage aiResponse = onChat(conversationHistory,150);
+        System.out.println("aiResponse: " + aiResponse);
+
+        // 存储操作
+        chatMessageService.newChatMessage(sid,message,"员工");
+        chatMessageService.newChatMessage(sid,aiResponse.getContent(),"顾客");
+        redisTemplate.opsForList().rightPush(sid,aiResponse); // 对话消息记录存入Redis
+
+        return aiResponse.getContent();
+    }
+
+    @Override
+    public String getFeedBack(String sid) {
+        System.out.println("正在生成评分和反馈...");
+        // 新增对应session的对话历史记录
+        ChatMessage systemFeedback = new ChatMessage("system",ChatConstant.SYSTEM_FEEDBACK);
+        redisTemplate.opsForList().rightPush(sid,systemFeedback);
+        // 获取所有历史消息
+        List<ChatMessage> conversationHistory = (List<ChatMessage>) redisTemplate.opsForList().range(sid,0,-1);
+        System.out.println("conversationHistory: " + conversationHistory);
+        // 获取评分
+        boolean ratingSuccess=false;
+        ChatMessage aiResponse = new ChatMessage();
+        Integer count = 0;
+        while (!ratingSuccess) {
+            count++;
+            // 获取AI回复
+            setProperty();
+            aiResponse = onChat(conversationHistory,255);
+            System.out.println(count +" aiResponse: " + aiResponse);
+            // 存储操作
+            ratingSuccess = ratingsService.newRating(sid,aiResponse.getContent());
+        }
+        redisTemplate.opsForList().rightPush(sid,aiResponse);
+        return aiResponse.getContent();
+    }
+
+    public void setProperty() {
+        // 设置代理
         System.setProperty("http.proxyHost", chatProperties.getProxyHost());
         System.setProperty("http.proxyPort", chatProperties.getProxyPort());
         System.setProperty("https.proxyHost", chatProperties.getProxyHost());
         System.setProperty("https.proxyPort", chatProperties.getProxyPort());
-        OpenAiService service = new OpenAiService(chatProperties.getOpenaiKey()); // 创建一个AI对话service
-        List<ChatMessage> conversation_history = new ArrayList<>(Arrays.asList(
-                new ChatMessage("system", ChatConstant.SYSTEM_INITIAL),
-                new ChatMessage("user", ChatConstant.EMPLOYEE_GREETING),
-                new ChatMessage("assistant", ChatConstant.TOO_SLOW)
-        ));
-
-        System.out.print("Customer: "+ ChatConstant.TOO_SLOW+"\nEmployee: ");  // 在终端打印顾客抱怨开场白
-        Scanner scanner = new Scanner(System.in); // 获取回应输入
-        ChatMessage firstMsg = new ChatMessage(ChatMessageRole.USER.value(), scanner.nextLine()); // 将用户输入的第一条消息封装成一个 ChatMessage 对象，并将其加入到 conversation_history 列表中。
-        conversation_history.add(firstMsg);
-
-        while (true) {
-            ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
-                    .builder()
-                    .messages(conversation_history)
-                    .model(chatProperties.getModel())
-                    .maxTokens(150)
-                    .temperature(chatProperties.getTemperature())
-                    .build();
-            ChatCompletionResult result = service.createChatCompletion(chatCompletionRequest);
-            ChatMessage response = result.getChoices().get(0).getMessage();
-            conversation_history.add(response);
-
-            System.out.print("Customer: " + response.getContent()+"\nEmployee: ");
-            String nextLine = scanner.nextLine();
-            if (nextLine.equalsIgnoreCase("exit")) {
-                break;
-            }
-            conversation_history.add(new ChatMessage(ChatMessageRole.USER.value(), nextLine));
-        }
-
-        System.out.println("对话结束，正在生成评分和反馈...");
-        conversation_history.add(new ChatMessage("system",ChatConstant.SYSTEM_FEEDBACK));
-        ChatCompletionRequest feedbackCompletionRequest = ChatCompletionRequest
-                .builder()
-                .messages(conversation_history)
-                .model(chatProperties.getModel())
-                .maxTokens(400)
-                .temperature(chatProperties.getTemperature())
-                .build();
-        ChatCompletionResult result = service.createChatCompletion(feedbackCompletionRequest);
-        ChatMessage response = result.getChoices().get(0).getMessage();
-        conversation_history.add(response);
-        System.out.print(response.getContent());
+        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
     }
 
+    public ChatMessage onChat(List<ChatMessage> conversationHistory,Integer maxTokens){// 获取AI回应
 
-
+        ChatCompletionRequest chatCompletionRequest = ChatCompletionRequest
+                .builder()
+                .messages(conversationHistory)
+                .model(chatProperties.getModel())
+                .maxTokens(maxTokens)
+                .temperature(chatProperties.getTemperature())
+                .build();
+        ChatCompletionResult result = service.createChatCompletion(chatCompletionRequest);
+        ChatMessage aiResponse = result.getChoices().get(0).getMessage();
+        return aiResponse;
+    }
 }

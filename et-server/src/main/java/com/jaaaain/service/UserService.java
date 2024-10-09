@@ -1,5 +1,6 @@
 package com.jaaaain.service;
 
+import com.jaaaain.dto.UserCreateDTO;
 import com.jaaaain.dto.UserLoginDTO;
 import com.jaaaain.entity.User;
 import com.jaaaain.result.PageBean;
@@ -20,13 +21,6 @@ public interface UserService {
     User login(UserLoginDTO userLoginDTO);
 
     /**
-     * 通过ID查询单条数据
-     * @param userId 主键
-     * @return 实例对象
-     */
-    User queryById(String userId);
-
-    /**
      * 分页查询
      * @param user 筛选条件
      * @return 查询结果
@@ -35,10 +29,10 @@ public interface UserService {
 
     /**
      * 新增数据
+     *
      * @param user 实例对象
-     * @return 实例对象
      */
-    User insert(User user);
+    void addUser(UserCreateDTO user);
 
     /**
      * 修改数据
@@ -49,11 +43,11 @@ public interface UserService {
 
     /**
      * 通过主键删除数据
+     *
      * @param id 主键
-     * @return 是否成功
      */
      // 删除用户
-    boolean deleteUserById(Integer id);
+    void deleteUserById(Integer id);
     /**
      * 查询所有用户
      * @return 用户列表
@@ -61,6 +55,6 @@ public interface UserService {
     List<User> queryAllUsers();
 
     // 根据用户ID切换isAdmin状态
-    boolean toggleAdmin(Integer userId);
+    void toggleAdmin(Integer userId);
 
 }

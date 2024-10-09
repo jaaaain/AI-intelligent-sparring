@@ -14,7 +14,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserLoginVO implements Serializable {
-    private String userId;
+    private Integer userId;
     private String username;
     private int isAdmin;
     private String token;

@@ -15,6 +15,7 @@
     <div v-for="(message, index) in messages" :key="index">
       <p><strong>{{ message.sender }}:</strong> {{ message.msg }}</p>
     </div>
+    <button @click="sendWithToken">测试按钮</button>
   </div>
 </template>
 
@@ -41,7 +42,7 @@ export default {
       this.connect(sessionId, this.selectedOption, token);
     },
     connect(sessionId, selectedOption, token) {
-      let socketUrl = `ws://localhost:8080/api/websocket/conversation/${sessionId}?option=${selectedOption}&token=${token}`;
+      let socketUrl = `ws://localhost:8080/api/websocket/conversation/${sessionId}?option=${selectedOption}&uid=${this.userid}`;
       this.websocket = new WebSocket(socketUrl);
       // 使用箭头函数确保 `this` 指向 Vue 实例
       this.websocket.onmessage = (message) => {
@@ -49,6 +50,11 @@ export default {
         console.log(JSON.stringify(this.messages));
         this.onMessageReceived(message);
       };
+      this.websocket.onClose = (e) => {
+        console.log('websocket 断开: ' + e.code + ' ' + e.reason + ' ' + e.wasClean)
+        console.log(e)
+        this.isClosing = false;
+      }
     },
     stopTrain() {
       this.isClosing = true;
@@ -64,7 +70,6 @@ export default {
         if (this.isClosing == true) {
           this.websocket.close(); // 关闭 WebSocket 连接
           console.log("对话已结束，WebSocket 连接已关闭。");
-          this.isClosing=false;
         }
       } catch (e) {
         console.error("消息解析失败: ", e);
@@ -81,6 +86,19 @@ export default {
         console.log(JSON.stringify(message));
         this.messageContent = ''; // 清空输入框
       }
+    },
+    sendWithToken() {
+      const token = "eyJhbGciOiJIUzI1NiJ9.eyJpc0FkbWluIjoxLCJleHAiOjE3Mjc4ODYyMDcsInVzZXJJZCI6MTExMTExLCJ1c2VybmFtZSI6InFlYWNmdHZnc3YifQ.PnooArf6ou_HbriHjOAk625LGcBjUse-Lh_OJyo_b2w";
+
+      fetch("api/conversations/user/111111", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      }).then((res) => {
+        console.log(res);
+      })
     }
   }
 };

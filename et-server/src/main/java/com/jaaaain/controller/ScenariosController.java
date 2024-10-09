@@ -1,13 +1,12 @@
 package com.jaaaain.controller;
 
-import com.jaaaain.entity.Scenarios;
+import com.jaaaain.dto.ScenariosQueryDTO;
 import com.jaaaain.result.PageBean;
 import com.jaaaain.result.Result;
 import com.jaaaain.service.ScenariosService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 /**
@@ -15,50 +14,19 @@ import java.util.List;
  * @since 2024-07-26 15:41:01
  */
 @RestController
+@RequestMapping("/scenarios")
 public class ScenariosController {
 
     @Autowired
     private ScenariosService scenariosService;
 
     /**
-     * 新增评分维度
-     * @param scenarios
+     * 场景列表
      */
-    @PostMapping("/admin/scenarios")
-    public Result add(@RequestBody Scenarios scenarios) {
-        scenariosService.insert(scenarios);
-        return Result.success();
-    }
-
-    /**
-     * 修改评分维度
-     * @param scenarios_id,scenarios
-     */
-    @PutMapping("/admin/scenarios")
-    public Result update(@PathVariable int scenarios_id, @RequestBody Scenarios scenarios) {
-        scenarios.setScenarioId(scenarios_id);
-        scenariosService.update(scenarios);
-        return Result.success();
-    }
-
-    /**
-     * 评分维度列表
-     */
-    @GetMapping("/admin/scenarios")
-    public Result getScenariosList(@RequestParam(defaultValue = "1") int page,
-                                    @RequestParam(defaultValue = "10") int size) {
-        PageBean pageBean = scenariosService.queryALLByPage(page,size);
+    @GetMapping("/list")
+    public Result getScenariosList(@Validated ScenariosQueryDTO scenariosQueryDTO) {
+        PageBean pageBean = scenariosService.queryForScenarios(scenariosQueryDTO);
         return Result.success(pageBean);
     }
-
-    /**
-     * 获取启用的评分维度信息
-     */
-    @GetMapping("/scenarios")
-    public Result getEnabledScenarios() {
-        List<Scenarios> list = scenariosService.queryEnabled();
-        return Result.success(list);
-    }
-
 }
 

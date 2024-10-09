@@ -2,17 +2,17 @@ package com.jaaaain.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.jaaaain.constant.MessageConstant;
+import com.jaaaain.dto.UserCreateDTO;
 import com.jaaaain.dto.UserLoginDTO;
 import com.jaaaain.entity.User;
-import com.jaaaain.exception.AccountNotFoundException;
-import com.jaaaain.exception.PasswordErrorException;
+import com.jaaaain.exception.BizException;
+import com.jaaaain.exception.BizExceptionEnum;
 import com.jaaaain.mapper.UserMapper;
+import com.jaaaain.properties.JwtProPerties;
 import com.jaaaain.result.PageBean;
 import com.jaaaain.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 import java.util.List;
 
@@ -26,6 +26,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private JwtProPerties jwtProPerties;
+
     /**
      * 用户登录
      * @param userLoginDTO
@@ -34,7 +37,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User login(UserLoginDTO userLoginDTO) {
 
-        String userId = userLoginDTO.getUserId();
+        Integer userId = userLoginDTO.getUserId();
         String password = userLoginDTO.getPassword();
 
         //1、根据用户名查询数据库中的数据
@@ -43,29 +46,16 @@ public class UserServiceImpl implements UserService {
         //2、处理各种异常情况（用户名不存在、密码不对、账号被锁定）
         if (user == null) {
             //账号不存在
-            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+            throw new BizException(BizExceptionEnum.USER_NOT_EXIST);
         }
-
-        //密码比对
-//        password = DigestUtils.md5DigestAsHex(password.getBytes());
         if (!password.equals(user.getPassword())) {
             //密码错误
-            throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
+            throw new BizException(BizExceptionEnum.USER_PASSWORD_ERROR);
         }
 
-        //3、返回实体对象
         return user;
     }
 
-    /**
-     * 通过ID查询单条数据
-     * @param userId 主键
-     * @return 实例对象
-     */
-    @Override
-    public User queryById(String userId) {
-        return userMapper.queryById(userId);
-    }
 
     /**
      * 分页查询
@@ -82,14 +72,12 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 新增数据
+     * 新增
      * @param user 实例对象
-     * @return 实例对象
      */
     @Override
-    public User insert(User user) {
+    public void addUser(UserCreateDTO user) {
         userMapper.insert(user);
-        return user;
     }
 
     /**
@@ -100,20 +88,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public User update(User user) {
         userMapper.update(user);
-        return queryById(String.valueOf(user.getUserId())); // 将 Integer 转为 String
+        return userMapper.queryById(user.getUserId());
     }
 
     /**
      * 通过主键删除数据
+     *
      * @param id 主键
-     * @return 是否成功
      */
-
-
     @Override
-    public boolean deleteUserById(Integer id) {
+    public void deleteUserById(Integer id) {
         int rows = userMapper.deleteById(id);
-        return rows > 0;
+        if (rows == 0) {
+            throw new BizException(BizExceptionEnum.USER_NOT_EXIST);
+        }
     }
 
 
@@ -127,18 +115,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean toggleAdmin(Integer userId) {
+    public void toggleAdmin(Integer userId) {
         // 查询用户
         User user = userMapper.queryById(userId);
         if (user == null) {
-            return false; // 用户不存在
+            throw new BizException(BizExceptionEnum.USER_NOT_EXIST); // 用户不存在
         }
-
         // 切换用户权限
         user.setIsAdmin(user.getIsAdmin() == 0 ? 1 : 0);
-
         // 更新用户状态
-        return userMapper.update(user) > 0;
+        userMapper.update(user);
     }
 
 
