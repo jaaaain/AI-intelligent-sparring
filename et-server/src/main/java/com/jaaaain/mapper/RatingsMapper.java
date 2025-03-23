@@ -1,6 +1,7 @@
 package com.jaaaain.mapper;
 
 import com.jaaaain.entity.Ratings;
+import com.jaaaain.vo.RatAvgVO;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -38,5 +39,18 @@ public interface RatingsMapper {
      */
     int insert(Ratings ratings);
 
+    /**
+     * 获取用户所有会话历史评分
+     * @param userId
+     * @return
+     */
+    List<Ratings> queryByUserId(String userId);
+
+    /**
+     * 获取用户各维度平均分
+     * @param uid
+     * @return
+     */
+    RatAvgVO queryAvgByUserId(String uid);
 }
 

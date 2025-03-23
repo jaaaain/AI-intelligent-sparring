@@ -3,6 +3,7 @@ package com.jaaaain.service.impl;
 import com.jaaaain.entity.Ratings;
 import com.jaaaain.mapper.RatingsMapper;
 import com.jaaaain.service.RatingsService;
+import com.jaaaain.vo.RatAvgVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,12 @@ public class RatingsServiceImpl implements RatingsService {
     @Autowired
     private RatingsMapper ratingsMapper;
 
+    /**
+     * 创建评分记录
+     * @param sid
+     * @param aiResponse
+     * @return
+     */
     @Override
     public boolean newRating(String sid,String aiResponse) {
         // 检验ai的回复符合解析规范
@@ -57,10 +64,33 @@ public class RatingsServiceImpl implements RatingsService {
      * @param ratingId 主键
      * @return 是否成功
      */
-    @Override
     public boolean deleteById(Integer ratingId) {
         return ratingsMapper.deleteById(ratingId) > 0;
     }
+
+    /**
+     * 获取用户所有会话历史评分
+     *
+     * @param uid
+     * @return
+     */
+    @Override
+    public List<Ratings> queryByUserId(String uid) {
+        return ratingsMapper.queryByUserId(uid);
+    }
+
+    /**
+     * 获取用户各维度平均分
+     *
+     * @param uid
+     * @return
+     */
+    @Override
+    public RatAvgVO avgByUserId(String uid) {
+        return ratingsMapper.queryAvgByUserId(uid);
+    }
+
+
     private Ratings regexForRating(Ratings ratings,String str){
         String pattern1 = ".*(?<dimension>L|A|S|T).*：(?<score>\\d+)/10，(?<comment>.*)";
         String pattern2 = "(.*\n?)+\n*suggestion：\n*(?<suggestion>(.*\n?)*)";

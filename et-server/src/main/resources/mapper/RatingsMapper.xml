@@ -9,6 +9,20 @@
         values (#{sessionId},#{score},#{suggestion},NOW(),
                 #{L},#{A},#{S},#{T},#{L_comment},#{A_comment},#{S_comment},#{T_comment})
     </insert>
+    <select id="queryByUserId" resultType="com.jaaaain.entity.Ratings">
+        select *
+        from ratings
+        where session_id in (select session_id
+                             from chatsession
+                             where user_id=#{userId})
+    </select>
+    <select id="queryAvgByUserId" resultType="com.jaaaain.vo.RatAvgVO">
+        select AVG(L) L_avg,AVG(A) A_avg,AVG(S) S_avg,AVG(T) T_avg,AVG(score) score_avg
+        from ratings
+        where session_id in (select session_id
+                             from chatsession
+                             where user_id=#{userId})
+    </select>
 
 </mapper>
 

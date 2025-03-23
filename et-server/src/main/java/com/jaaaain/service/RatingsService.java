@@ -1,6 +1,9 @@
 package com.jaaaain.service;
 
 import com.jaaaain.entity.Ratings;
+import com.jaaaain.vo.RatAvgVO;
+
+import java.util.List;
 
 /**
  * 存储对话的评分结果(Ratings)表服务接口
@@ -14,9 +17,34 @@ public interface RatingsService {
      */
     Ratings queryByRatingId(Integer ratingId);
 
+    /**
+     * 获取单次会话评分
+     * @param sessionId
+     * @return
+     */
     Ratings queryBySessionId(String sessionId);
 
+    /**
+     * 创建评分记录
+     * @param sid
+     * @param aiResponse
+     * @return
+     */
     boolean newRating(String sid, String aiResponse);
 
-    boolean deleteById(Integer ratingId);
+    /**
+     * 获取用户所有会话历史评分
+     *
+     * @param uid
+     * @return
+     */
+    List<Ratings> queryByUserId(String uid);
+
+    /**
+     * 获取用户各维度平均分
+     *
+     * @param uid
+     * @return
+     */
+    RatAvgVO avgByUserId(String uid);
 }
